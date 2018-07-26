@@ -454,7 +454,7 @@ instance.prototype.actions = function(system) {
 					type: 'textinput',
 					id: 'variables',
 					tooltip: 'Example: f0="John Doe" f1="Foobar janitor"',
-					default: '',
+					default: 'f0="John Doe"',
 					regex: '/(^([^=]+="[^"]+"[ ,]*)+$|^$)/'
 				}
 			]
@@ -481,7 +481,7 @@ instance.prototype.actions = function(system) {
 					type: 'textinput',
 					id: 'templatelayer',
 					default: '1',
-					regex: self.REGEX_NUMBER
+					regex: '/^\\d+$/'
 				},
 				{
 					label: 'Template variables',
@@ -593,13 +593,15 @@ instance.prototype.action = function(action) {
 
 		out += ' ADD';
 
-		out += ' "' + action.options.template.replace(/"/g, '\\"') + '"';
-
 		if (action.options.templatelayer != '') {
 			out += ' ' + parseInt(action.options.templatelayer)
 		}
 
-		out += ' ' + (action.options.playonload == 'true' ? '1' : '0');
+		out += ' "' + action.options.template.replace(/"/g, '\\"') + '"';
+
+		if (action.options.playonload == 'true' || action.options.variables != '') {
+			out += ' ' + (action.options.playonload == 'true' ? '1' : '0');
+		}
 
 		if (action.options.variables != '') {
 			var templ = '';
@@ -626,11 +628,7 @@ instance.prototype.action = function(action) {
 
 		out += ' UPDATE';
 
-		if (action.options.templatelayer != '') {
-			out += ' ' + parseInt(action.options.templatelayer)
-		}
-
-		out += ' ' + (action.options.playonload == 'true' ? '1' : '0');
+		out += ' ' + parseInt(action.options.templatelayer)
 
 		if (action.options.variables != '') {
 			var templ = '';
