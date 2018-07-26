@@ -615,8 +615,6 @@ instance.prototype.action = function(action) {
 
 			templ += '</templateData>';
 			out += ' "' + templ.replace(/"/g,'\\"') + '"';
-		} else {
-			out += ' ""';
 		}
 
 	} else if (cmd == 'CG UPDATE') {
@@ -642,8 +640,6 @@ instance.prototype.action = function(action) {
 
 			templ += '</templateData>';
 			out += ' "' + templ.replace(/"/g,'\\"') + '"';
-		} else {
-			out += ' ""';
 		}
 
 	} else if (cmd == 'COMMAND') {
