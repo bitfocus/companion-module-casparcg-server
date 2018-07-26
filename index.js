@@ -411,6 +411,88 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'CG ADD': {
+			label: 'CG ADD',
+			options: [
+				{
+					label: 'Channel',
+					type: 'textinput',
+					id: 'channel',
+					default: 1,
+					regex: '/^\\d+$/'
+				},
+				{
+					label: 'Layer',
+					type: 'textinput',
+					id: 'layer',
+					default: '',
+					regex: '/^\\d*$/'
+				},
+				{
+					label: 'Template name',
+					type: 'textinput',
+					id: 'template',
+					default: '',
+					regex: self.REGEX_SOMETHING
+				},
+				{
+					label: 'Play on load',
+					type: 'dropdown',
+					id: 'playonload',
+					choices: self.CHOICES_YESNO_BOOLEAN,
+					default: 'false'
+				},
+				{
+					label: 'Template host layer',
+					type: 'textinput',
+					id: 'templatelayer',
+					default: '1',
+					regex: self.REGEX_NUMBER
+				},
+				{
+					label: 'Template variables',
+					type: 'textinput',
+					id: 'variables',
+					tooltip: 'Example: f0="John Doe" f1="Foobar janitor"',
+					default: '',
+					regex: '/(^([^=]+="[^"]+"[ ,]*)+$|^$)/'
+				}
+			]
+		},
+		'CG UPDATE': {
+			label: 'CG UPDATE',
+			options: [
+				{
+					label: 'Channel',
+					type: 'textinput',
+					id: 'channel',
+					default: 1,
+					regex: '/^\\d+$/'
+				},
+				{
+					label: 'Layer',
+					type: 'textinput',
+					id: 'layer',
+					default: '',
+					regex: '/^\\d*$/'
+				},
+				{
+					label: 'Template host layer',
+					type: 'textinput',
+					id: 'templatelayer',
+					default: '1',
+					regex: self.REGEX_NUMBER
+				},
+				{
+					label: 'Template variables',
+					type: 'textinput',
+					id: 'variables',
+					tooltip: 'Example: f0="John Doe" f1="Foobar janitor"',
+					default: '',
+					regex: '/(^([^=]+="[^"]+"[ ,]*)+$|^$)/'
+				}
+			]
+		},
 		'COMMAND': {
 			label: 'Manually specify AMCP command',
 			options: [{
@@ -433,6 +515,10 @@ function AMCP_PARAMETER(data) {
 	}
 
 	return data;
+}
+
+function esc(str) {
+	return str.replace(/"/g, "&quot;");
 }
 
 instance.prototype.action = function(action) {
@@ -498,6 +584,70 @@ instance.prototype.action = function(action) {
 			out += ' TRANSFORMS';
 		}
 
+	} else if (cmd == 'CG ADD') {
+		out = 'CG ' + parseInt(action.options.channel);
+
+		if (action.options.layer != '') {
+			out += '-' + parseInt(action.options.layer);
+		}
+
+		out += ' ADD';
+
+		out += ' "' + action.options.template.replace(/"/g, '\\"') + '"';
+
+		if (action.options.templatelayer != '') {
+			out += ' ' + parseInt(action.options.templatelayer)
+		}
+
+		out += ' ' + (action.options.playonload == 'true' ? '1' : '0');
+
+		if (action.options.variables != '') {
+			var templ = '';
+			templ += '<templateData>';
+			var re = /(([^=]+?)="([^"]+?)"[ ,]*)/g;
+
+			var match;
+			while ((match = re.exec(action.options.variables)) !== null) {
+				templ += '<componentData id="' + esc(match[2]) + '"><data id="text" value="' + esc(match[3]) + '" /></componentData>';
+			}
+
+			templ += '</templateData>';
+			out += ' "' + templ.replace(/"/g,'\\"') + '"';
+		} else {
+			out += ' ""';
+		}
+
+	} else if (cmd == 'CG UPDATE') {
+		out = 'CG ' + parseInt(action.options.channel);
+
+		if (action.options.layer != '') {
+			out += '-' + parseInt(action.options.layer);
+		}
+
+		out += ' UPDATE';
+
+		if (action.options.templatelayer != '') {
+			out += ' ' + parseInt(action.options.templatelayer)
+		}
+
+		out += ' ' + (action.options.playonload == 'true' ? '1' : '0');
+
+		if (action.options.variables != '') {
+			var templ = '';
+			templ += '<templateData>';
+			var re = /(([^=]+?)="([^"]+?)"[ ,]*)/g;
+
+			var match;
+			while ((match = re.exec(action.options.variables)) !== null) {
+				templ += '<componentData id="' + esc(match[2]) + '"><data id="text" value="' + esc(match[3]) + '" /></componentData>';
+			}
+
+			templ += '</templateData>';
+			out += ' "' + templ.replace(/"/g,'\\"') + '"';
+		} else {
+			out += ' ""';
+		}
+
 	} else if (cmd == 'COMMAND') {
 		out = action.options.cmd;
 	}
@@ -518,7 +668,7 @@ instance.prototype.action = function(action) {
 instance.module_info = {
 	label: 'CasparCG',
 	id: 'casparcg',
-	version: '0.0.1'
+	version: '0.0.2'
 };
 
 instance_skel.extendedBy(instance);
