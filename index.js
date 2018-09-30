@@ -15,13 +15,13 @@ function instance(system, id, config) {
 }
 
 function swap_obj(obj){
-  var ret = {};
+	var ret = {};
 
-  for(var key in obj){
-    ret[obj[key]] = key;
-  }
+	for(var key in obj){
+		ret[obj[key]] = key;
+	}
 
-  return ret;
+	return ret;
 }
 
 instance.prototype.updateConfig = function(config) {
@@ -657,12 +657,6 @@ instance.prototype.action = function(action) {
 		}
 
 	}
-};
-
-instance.module_info = {
-	label: 'CasparCG',
-	id: 'casparcg',
-	version: '0.0.2'
 };
 
 instance_skel.extendedBy(instance);

@@ -1,6 +1,12 @@
 {
   "name": "casparcg",
-  "version": "0.0.2",
+  "version": "1.0.0",
+	"api_version": "1.0.0",
+	"keywords": [ "Video", "Software", "Graphics" ],
+	"manufacturer": "CasparCG",
+	"product": "Server",
+	"shortname": "caspar",
+	"homepage": "https://www.casparcg.com/",
   "description": "CasparCG module for Companion",
   "main": "index.js",
   "scripts": {
