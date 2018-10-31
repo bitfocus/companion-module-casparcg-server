@@ -245,7 +245,12 @@ instance.prototype.handleTLS = function(data) {
 	self.CHOICES_TEMPLATES.length = 0;
 
 	for (var i = 0; i < data.length; ++i) {
-		self.CHOICES_TEMPLATES.push({ label: data[i], id: data[i] });
+		var match = data[i].match(/^"([^"]+)"/);
+		if (match && match.length > 1) {
+			self.CHOICES_TEMPLATES.push({ label: match[1], id: match[1] });
+		} else {
+			self.CHOICES_TEMPLATES.push({ label: data[i].split(/ /)[0], id: data[i].split(/ /)[0] });
+		}
 	}
 
 	self.actions();
