@@ -108,7 +108,6 @@ instance.prototype.init_tcp = function() {
 
 		// separate buffered stream into lines with responses
 		self.socket.on('data', function (chunk) {
-			debug("Chunk of data: ", chunk);
 			var i = 0, line = '', offset = 0;
 			receivebuffer += chunk;
 
@@ -122,7 +121,6 @@ instance.prototype.init_tcp = function() {
 		});
 
 		self.socket.on('receiveline', function (line) {
-			debug("Received line from CasparCG:", line, self.acmp_state);
 			var error = false;
 
 			// New message
@@ -139,8 +137,6 @@ instance.prototype.init_tcp = function() {
 					self.log('error', 'Protocol out of sync, expected number: ' + line);
 					return;
 				}
-
-				debug('CODE: ' + code);
 
 				switch (code) {
 					case RETCODE.INVALID_CHANNEL:
@@ -249,10 +245,7 @@ instance.prototype.handleTLS = function(data) {
 	self.CHOICES_TEMPLATES.length = 0;
 
 	for (var i = 0; i < data.length; ++i) {
-		var match = data[i].match(/^"([^"]+)"/);
-		if (match && match.length > 1) {
-			self.CHOICES_TEMPLATES.push({ label: match[1], id: match[1] });
-		}
+		self.CHOICES_TEMPLATES.push({ label: data[i], id: data[i] });
 	}
 
 	self.actions();
@@ -499,7 +492,7 @@ instance.prototype.actions = function() {
 					type: 'dropdown',
 					id: 'template_dd',
 					default: '',
-					regex: self.CHOICES_TEMPLATES
+					choices: self.CHOICES_TEMPLATES
 				},
 				{
 					label: 'Or template name',
