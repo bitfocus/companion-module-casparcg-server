@@ -6,6 +6,12 @@ var log;
 function instance(system, id, config) {
 	var self = this;
 
+	self.multiline_callback = {};
+	self.multiline_current = '';
+
+	self.CHOICES_TEMPLATES = [];
+	self.CHOICES_MEDIAFILES = [];
+
 	// super-constructor
 	instance_skel.apply(this, arguments);
 
@@ -93,6 +99,9 @@ instance.prototype.init_tcp = function() {
 
 		self.socket.on('connect', function () {
 			debug("Connected");
+
+			self.requestMultilineData("CLS", self.handleCLS.bind(self));
+			self.requestMultilineData("TLS", self.handleTLS.bind(self));
 		});
 
 		var receivebuffer = '';
@@ -113,13 +122,18 @@ instance.prototype.init_tcp = function() {
 		});
 
 		self.socket.on('receiveline', function (line) {
-			debug("Received line from CasparCG:", line);
+			debug("Received line from CasparCG:", line, self.acmp_state);
 			var error = false;
 
 			// New message
 			if (self.acmp_state == ACMP_STATE.NEXT) {
-				var code = line.match(/^(\d+)\s+/);
+				var code = line.match(/^(\d+)\s+(\S*)/);
+				var status;
 				if (code && code.length > 1) {
+					if (code.length > 2) {
+						status = code[2];
+					}
+
 					code = parseInt(code[1]);
 				} else {
 					self.log('error', 'Protocol out of sync, expected number: ' + line);
@@ -164,7 +178,9 @@ instance.prototype.init_tcp = function() {
 
 					case RETCODE.OKMULTIDATA:
 						self.acmp_state = ACMP_STATE.MULTI_LINE;
+						self.multiline_current = status;
 						self.error_code = undefined;
+						self.multilinedata = [];
 						break;
 
 					default:
@@ -191,11 +207,55 @@ instance.prototype.init_tcp = function() {
 
 				if (line == '') {
 					self.acmp_state = ACMP_STATE.NEXT;
+
+					self.multiline_current = self.multiline_current.toUpperCase();
+
+					if (self.multiline_callback[self.multiline_current] !== undefined && self.multiline_callback[self.multiline_current].length) {
+						var cb = self.multiline_callback[self.multiline_current].shift();
+
+						if (typeof cb == 'function') {
+							cb(self.multilinedata);
+							self.multilinedata.length = 0;
+							self.multiline_current = '';
+						}
+					}
+				} else {
+					self.multilinedata.push(line);
 				}
 			}
 		});
 
 	}
+};
+
+instance.prototype.handleCLS = function(data) {
+	var self = this;
+
+	self.CHOICES_MEDIAFILES.length = 0;
+
+	for (var i = 0; i < data.length; ++i) {
+		var match = data[i].match(/^"([^"]+)"/);
+		if (match && match.length > 1) {
+			self.CHOICES_MEDIAFILES.push({ label: match[1], id: match[1] });
+		}
+	}
+
+	self.actions();
+};
+
+instance.prototype.handleTLS = function(data) {
+	var self = this;
+
+	self.CHOICES_TEMPLATES.length = 0;
+
+	for (var i = 0; i < data.length; ++i) {
+		var match = data[i].match(/^"([^"]+)"/);
+		if (match && match.length > 1) {
+			self.CHOICES_TEMPLATES.push({ label: match[1], id: match[1] });
+		}
+	}
+
+	self.actions();
 };
 
 // Return config fields for web config
@@ -239,7 +299,7 @@ instance.prototype.CHOICES_TRANSITIONS = [
 	{ label: 'SLIDE', id: 'SLIDE' }
 ];
 
-instance.prototype.actions = function(system) {
+instance.prototype.actions = function() {
 	var self = this;
 
 	var LOADPLAYPARAMS = [
@@ -258,11 +318,17 @@ instance.prototype.actions = function(system) {
 			regex: '/^\\d*$/'
 		},
 		{
-			label: 'Clip name',
+			label: 'Clip',
+			type: 'dropdown',
+			id: 'clip_dd',
+			default: '',
+			choices: self.CHOICES_MEDIAFILES
+		},
+		{
+			label: 'Or clip name',
 			type: 'textinput',
 			id: 'clip',
-			default: '',
-			regex: '/^.+$/'
+			default: ''
 		},
 		{
 			label: 'Loop clip',
@@ -429,11 +495,17 @@ instance.prototype.actions = function(system) {
 					regex: '/^\\d*$/'
 				},
 				{
-					label: 'Template name',
+					label: 'Template',
+					type: 'dropdown',
+					id: 'template_dd',
+					default: '',
+					regex: self.CHOICES_TEMPLATES
+				},
+				{
+					label: 'Or template name',
 					type: 'textinput',
 					id: 'template',
-					default: '',
-					regex: self.REGEX_SOMETHING
+					default: ''
 				},
 				{
 					label: 'Play on load',
@@ -493,6 +565,58 @@ instance.prototype.actions = function(system) {
 				}
 			]
 		},
+		'CG PLAY': {
+			label: 'CG PLAY',
+			options: [
+				{
+					label: 'Channel',
+					type: 'textinput',
+					id: 'channel',
+					default: 1,
+					regex: '/^\\d+$/'
+				},
+				{
+					label: 'Layer',
+					type: 'textinput',
+					id: 'layer',
+					default: '',
+					regex: '/^\\d*$/'
+				},
+				{
+					label: 'Template host layer',
+					type: 'textinput',
+					id: 'templatelayer',
+					default: '1',
+					regex: self.REGEX_NUMBER
+				}
+			]
+		},
+		'CG STOP': {
+			label: 'CG STOP',
+			options: [
+				{
+					label: 'Channel',
+					type: 'textinput',
+					id: 'channel',
+					default: 1,
+					regex: '/^\\d+$/'
+				},
+				{
+					label: 'Layer',
+					type: 'textinput',
+					id: 'layer',
+					default: '',
+					regex: '/^\\d*$/'
+				},
+				{
+					label: 'Template host layer',
+					type: 'textinput',
+					id: 'templatelayer',
+					default: '1',
+					regex: self.REGEX_NUMBER
+				}
+			]
+		},
 		'COMMAND': {
 			label: 'Manually specify AMCP command',
 			options: [{
@@ -507,8 +631,8 @@ instance.prototype.actions = function(system) {
 
 function AMCP_PARAMETER(data) {
 
-	data = data.replace(/\//, '\\\\');
-	data = data.replace(/"/, '\\"');
+	data = data.replace(/\//g, '\\\\');
+	data = data.replace(/"/g, '\\"');
 
 	if (data.match(/\s/)) {
 		return '"' + data + '"';
@@ -520,6 +644,22 @@ function AMCP_PARAMETER(data) {
 function esc(str) {
 	return str.replace(/"/g, "&quot;");
 }
+
+instance.prototype.requestMultilineData = function(command, callback) {
+	var self = this;
+
+	if (self.socket !== undefined && self.socket.connected) {
+		command = command.toUpperCase();
+
+		if (self.multiline_callback[command] === undefined) {
+			self.multiline_callback[command] = [];
+		}
+
+		self.multiline_callback[command].push(callback);
+
+		self.socket.send(command + "\r\n");
+	}
+};
 
 instance.prototype.action = function(action) {
 	var self = this;
@@ -534,7 +674,11 @@ instance.prototype.action = function(action) {
 			out += '-' + parseInt(action.options.layer);
 		}
 
-		out += ' ' + AMCP_PARAMETER(action.options.clip);
+		if (action.options.clip) {
+			out += ' ' + AMCP_PARAMETER(action.options.clip);
+		} else if (action.options.clip_dd) {
+			out += ' ' + AMCP_PARAMETER(action.options.clip_dd);
+		}
 
 		if (action.options.loop == 'true') {
 			out += ' LOOP';
@@ -597,7 +741,11 @@ instance.prototype.action = function(action) {
 			out += ' ' + parseInt(action.options.templatelayer)
 		}
 
-		out += ' "' + action.options.template.replace(/"/g, '\\"') + '"';
+		if (action.options.template) {
+			out += ' ' + AMCP_PARAMETER(action.options.template);
+		} else if (action.options.template_dd) {
+			out += ' ' + AMCP_PARAMETER(action.options.template_dd);
+		}
 
 		if (action.options.playonload == 'true' || action.options.variables != '') {
 			out += ' ' + (action.options.playonload == 'true' ? '1' : '0');
@@ -641,6 +789,28 @@ instance.prototype.action = function(action) {
 			templ += '</templateData>';
 			out += ' "' + templ.replace(/"/g,'\\"') + '"';
 		}
+
+	} else if (cmd == 'CG PLAY') {
+		out = 'CG ' + parseInt(action.options.channel);
+
+		if (action.options.layer != '') {
+			out += '-' + parseInt(action.options.layer);
+		}
+
+		out += ' PLAY';
+
+		out += ' ' + parseInt(action.options.templatelayer)
+
+	} else if (cmd == 'CG STOP') {
+		out = 'CG ' + parseInt(action.options.channel);
+
+		if (action.options.layer != '') {
+			out += '-' + parseInt(action.options.layer);
+		}
+
+		out += ' STOP';
+
+		out += ' ' + parseInt(action.options.templatelayer)
 
 	} else if (cmd == 'COMMAND') {
 		out = action.options.cmd;
