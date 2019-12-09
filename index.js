@@ -232,7 +232,8 @@ instance.prototype.handleCLS = function(data) {
 	for (var i = 0; i < data.length; ++i) {
 		var match = data[i].match(/^"([^"]+)"/);
 		if (match && match.length > 1) {
-			self.CHOICES_MEDIAFILES.push({ label: match[1], id: match[1] });
+			var file = match[1].replace(/\\/g, '\\\\');
+			self.CHOICES_MEDIAFILES.push({ label: file, id: file });
 		}
 	}
 
@@ -247,9 +248,11 @@ instance.prototype.handleTLS = function(data) {
 	for (var i = 0; i < data.length; ++i) {
 		var match = data[i].match(/^"([^"]+)"/);
 		if (match && match.length > 1) {
-			self.CHOICES_TEMPLATES.push({ label: match[1], id: match[1] });
+			var file = match[1].replace(/\\/g, '\\\\');
+			self.CHOICES_TEMPLATES.push({ label: file, id: file });
 		} else {
-			self.CHOICES_TEMPLATES.push({ label: data[i].split(/ /)[0], id: data[i].split(/ /)[0] });
+			var file = data[i].split(/ /)[0].replace(/\\/g, '\\\\');
+			self.CHOICES_TEMPLATES.push({ label: file, id: file });
 		}
 	}
 
