@@ -12,3 +12,4 @@
 * CALL
 * SWAP
 * Manually specify AMCP command
+* Goto relative position (from start or end of video)

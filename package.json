@@ -17,5 +17,8 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"author": "Håkon Nessjøen <haakon@bitfocus.io>",
-	"license": "ISC"
+	"license": "ISC",
+	"dependencies": {
+		"xml2js": "^0.4.19"
+	}
 }
