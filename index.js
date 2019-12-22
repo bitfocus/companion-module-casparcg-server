@@ -274,7 +274,6 @@ instance.prototype.handleTLS = function(data) {
 
 instance.prototype.executeGOTO = function(data, options) {
 	var self = this;
-	var out;
 
 	if (!data || !data.length || !options) {
 		return;
@@ -286,23 +285,41 @@ instance.prototype.executeGOTO = function(data, options) {
 		} else {
 			try {
 				var offset = parseInt(options.offset);
-				var framerate = parseInt(result.channel.framerate[0]);
-				var seek = 0
-				if (offset >= 0) {
-					seek = offset * framerate;
-				} else {
-					var clipLength = parseFloat(result.channel.stage[0].layer[0]['layer_' + options.layer][0].foreground[0].file[0].clip[1]);
-					seek = Math.floor(clipLength + offset) * framerate;
+
+				var framerate = 0;
+				var seek = 0;
+				if (result.layer) {
+					// CasparCG 2.0.7 or 2.1.0
+					framerate = parseInt(result.layer.foreground[0].producer[0].fps[0]);
+
+					if (offset >= 0) {
+						seek = offset * framerate;
+					} else {
+						var clipFrames = parseInt(result.layer.foreground[0].producer[0]['nb-frames'][0]);
+						seek = Math.floor(clipFrames + (offset * framerate));
+					}
+				} else if (result.channel) {
+					// CasparCG 2.2.0
+					framerate = parseInt(result.channel.framerate[0]);
+
+					if (offset >= 0) {
+						seek = offset * framerate;
+					} else {
+						var clipLength = parseFloat(result.channel.stage[0].layer[0]['layer_' + options.layer][0].foreground[0].file[0].clip[1]);
+						seek = Math.floor(clipLength + offset) * framerate;
+					}
 				}
 
-				out = 'CALL ' + parseInt(options.channel);
-				if (options.layer != '') {
-					out += '-' + parseInt(options.layer);
-				}
-				out += ' SEEK ' + seek;
+				if (framerate > 0) {
+					var out = 'CALL ' + parseInt(options.channel);
+					if (options.layer != '') {
+						out += '-' + parseInt(options.layer);
+					}
+					out += ' SEEK ' + seek;
 
-				if (self.socket !== undefined && self.socket.connected) {
-					self.socket.send(out + "\r\n");
+					if (self.socket !== undefined && self.socket.connected) {
+						self.socket.send(out + "\r\n");
+					}
 				}
 			} catch (e) {
 				debug('Error in INFO response: ' + e)
@@ -694,7 +711,7 @@ instance.prototype.actions = function() {
 					type: 'textinput',
 					id: 'layer',
 					default: '',
-					regex: '/^\\d*$/'
+					regex: '/^\\d+$/'
 				},
 				{
 					type: 'textinput',
