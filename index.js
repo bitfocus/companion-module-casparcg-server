@@ -274,6 +274,7 @@ instance.prototype.handleTLS = function(data) {
 
 instance.prototype.executeGOTO = function(data, options) {
 	var self = this;
+	var out;
 
 	if (!data || !data.length || !options) {
 		return;
@@ -293,7 +294,7 @@ instance.prototype.executeGOTO = function(data, options) {
 					var clipLength = parseFloat(result.channel.stage[0].layer[0]['layer_' + options.layer][0].foreground[0].file[0].clip[1]);
 					seek = Math.floor(clipLength + offset) * framerate;
 				}
-			
+
 				out = 'CALL ' + parseInt(options.channel);
 				if (options.layer != '') {
 					out += '-' + parseInt(options.layer);
@@ -340,7 +341,7 @@ instance.prototype.destroy = function() {
 		self.socket.destroy();
 	}
 
-	debug("destroy", self.id);;
+	debug("destroy", self.id);
 };
 
 instance.prototype.CHOICES_TRANSITIONS = [
@@ -712,7 +713,7 @@ function AMCP_PARAMETER(data) {
 	data = data.replace(/\//g, '\\\\');
 	data = data.replace(/"/g, '\\"');
 
-	if (data.match(/\s/)) {
+	if(data.match(/\s/)) {
 		return '"' + data + '"';
 	}
 
@@ -725,6 +726,7 @@ function esc(str) {
 
 instance.prototype.requestData = function(command, params, callback) {
 	var self = this;
+	var out;
 
 	if (self.socket !== undefined && self.socket.connected) {
 		command = command.toUpperCase();
@@ -735,9 +737,9 @@ instance.prototype.requestData = function(command, params, callback) {
 
 		self.response_callback[command].push(callback);
 
-		out = command
+		out = command;
 		if (params && params.length) {
-			out += ' ' + params
+			out += ' ' + params;
 		}
 		self.socket.send(out + "\r\n");
 	}
