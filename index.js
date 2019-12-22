@@ -259,12 +259,20 @@ instance.prototype.handleTLS = function(data) {
 	self.CHOICES_TEMPLATES.length = 0;
 
 	for (var i = 0; i < data.length; ++i) {
-		var match = data[i].match(/^"([^"]+)"/);
-		if (match && match.length > 1) {
-			var file = match[1].replace(/\\/g, '\\\\');
-			self.CHOICES_TEMPLATES.push({ label: file, id: file });
+		// Template response parsing from SuperFlyTv/casparcg-connection
+		// https://github.com/SuperFlyTV/casparcg-connection/blob/master/src/lib/ResponseParsers.ts#L320
+		var match = data[i].match(/\"(.*?)\" +(.*)/);
+		var file = null;
+		if (match === null) {
+			// propably 2.2.0
+			file = data[i];
 		} else {
-			var file = data[i].split(/ /)[0].replace(/\\/g, '\\\\');
+			// is 2.0.7 or 2.1.0 template
+			file = match[1];
+		}
+
+		if (file !== null) {
+			file = file.replace(/\\/g, '\\\\');
 			self.CHOICES_TEMPLATES.push({ label: file, id: file });
 		}
 	}
