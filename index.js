@@ -31,6 +31,33 @@ function swap_obj(obj){
 	return ret;
 }
 
+function build_templatedata_string(options) {
+	var templateData = {};
+
+	var match;
+	var re = /(([^=]+?)="([^"]+?)"[ ,]*)/g;
+	while ((match = re.exec(options.variables)) !== null) {
+		templateData[esc(match[2])] = esc(match[3]);
+	}
+
+	if (Object.keys(templateData).length === 0) {
+		return null;
+	}
+
+	var templ = '';
+	if (options.json === true) {
+		templ = JSON.stringify(templateData);
+	} else {
+		templ += '<templateData>';
+		for (var key in templateData) {
+			templ += '<componentData id="' + key + '"><data id="text" value="' + templateData[key] + '" /></componentData>';
+		}
+		templ += '</templateData>';
+	}
+
+	return templ;
+}
+
 instance.prototype.updateConfig = function(config) {
 	var self = this;
 
@@ -600,6 +627,12 @@ instance.prototype.actions = function() {
 					regex: self.REGEX_NUMBER
 				},
 				{
+					label: 'Send as JSON',
+					type: 'checkbox',
+					id: 'json',
+					default: false
+				},
+				{
 					label: 'Template variables',
 					type: 'textinput',
 					id: 'variables',
@@ -632,6 +665,12 @@ instance.prototype.actions = function() {
 					id: 'templatelayer',
 					default: '1',
 					regex: '/^\\d+$/'
+				},
+				{
+					label: 'Send as JSON',
+					type: 'checkbox',
+					id: 'json',
+					default: false
 				},
 				{
 					label: 'Template variables',
@@ -861,17 +900,10 @@ instance.prototype.action = function(action) {
 		}
 
 		if (action.options.variables != '') {
-			var templ = '';
-			templ += '<templateData>';
-			var re = /(([^=]+?)="([^"]+?)"[ ,]*)/g;
-
-			var match;
-			while ((match = re.exec(action.options.variables)) !== null) {
-				templ += '<componentData id="' + esc(match[2]) + '"><data id="text" value="' + esc(match[3]) + '" /></componentData>';
+			var templ = build_templatedata_string(action.options);
+			if (templ) {
+				out += ' "' + templ.replace(/"/g,'\\"') + '"';
 			}
-
-			templ += '</templateData>';
-			out += ' "' + templ.replace(/"/g,'\\"') + '"';
 		}
 
 	} else if (cmd == 'CG UPDATE') {
@@ -886,17 +918,10 @@ instance.prototype.action = function(action) {
 		out += ' ' + parseInt(action.options.templatelayer)
 
 		if (action.options.variables != '') {
-			var templ = '';
-			templ += '<templateData>';
-			var re = /(([^=]+?)="([^"]+?)"[ ,]*)/g;
-
-			var match;
-			while ((match = re.exec(action.options.variables)) !== null) {
-				templ += '<componentData id="' + esc(match[2]) + '"><data id="text" value="' + esc(match[3]) + '" /></componentData>';
+			var templ = build_templatedata_string(action.options);
+			if (templ) {
+				out += ' "' + templ.replace(/"/g,'\\"') + '"';
 			}
-
-			templ += '</templateData>';
-			out += ' "' + templ.replace(/"/g,'\\"') + '"';
 		}
 
 	} else if (cmd == 'CG PLAY') {
