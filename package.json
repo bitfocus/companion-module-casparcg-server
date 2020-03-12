@@ -1,5 +1,8 @@
 {
-	"name": "casparcg",
+	"name": "casparcg-server",
+	"legacy": [
+		"casparcg"
+	],
 	"version": "1.0.2",
 	"api_version": "1.0.0",
 	"keywords": [
