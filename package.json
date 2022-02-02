@@ -13,7 +13,7 @@
 	"manufacturer": "CasparCG",
 	"product": "Server",
 	"shortname": "caspar",
-	"homepage": "https://www.casparcg.com/",
+	"homepage": "https://github.com/bitfocus/companion-module-casparcg-server#readme",
 	"description": "CasparCG module for Companion",
 	"main": "index.js",
 	"scripts": {
@@ -23,5 +23,12 @@
 	"license": "ISC",
 	"dependencies": {
 		"xml2js": "^0.4.19"
+	},
+	"bugs": {
+		"url": "https://github.com/bitfocus/companion-module-casparcg-server/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bitfocus/companion-module-casparcg-server.git"
 	}
 }
