@@ -488,7 +488,7 @@ instance.prototype.actions = function() {
 		}
 	];
 
-	self.system.emit('instance_actions', self.id, {
+	self.setActions({
 		'LOADBG': {
 			label: 'LOADBG',
 			options: LOADPLAYPARAMS
