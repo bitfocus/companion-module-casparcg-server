@@ -901,7 +901,7 @@ instance.prototype.action = function(action) {
 
 		if (action.options.variables != '') {
 			self.parseVariables(action.options.variables, (res) => {
-				action.options.variables = res
+				action.options.variables = res;
 				var templ = build_templatedata_string(action.options);
 				if (templ) {
 					out += ' "' + templ.replace(/"/g,'\\"') + '"';
