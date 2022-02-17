@@ -900,10 +900,13 @@ instance.prototype.action = function(action) {
 		}
 
 		if (action.options.variables != '') {
-			var templ = build_templatedata_string(action.options);
-			if (templ) {
-				out += ' "' + templ.replace(/"/g,'\\"') + '"';
-			}
+			self.parseVariables(action.options.variables, (res) => {
+				action.options.variables = res
+				var templ = build_templatedata_string(action.options);
+				if (templ) {
+					out += ' "' + templ.replace(/"/g,'\\"') + '"';
+				}
+			})
 		}
 
 	} else if (cmd == 'CG UPDATE') {
@@ -918,10 +921,13 @@ instance.prototype.action = function(action) {
 		out += ' ' + parseInt(action.options.templatelayer)
 
 		if (action.options.variables != '') {
-			var templ = build_templatedata_string(action.options);
-			if (templ) {
-				out += ' "' + templ.replace(/"/g,'\\"') + '"';
-			}
+			self.parseVariables(action.options.variables, (res) => {
+				action.options.variables = res;
+				var templ = build_templatedata_string(action.options);
+				if (templ) {
+					out += ' "' + templ.replace(/"/g,'\\"') + '"';
+				}
+			})
 		}
 
 	} else if (cmd == 'CG PLAY') {
