@@ -902,7 +902,9 @@ instance.prototype.action = function(action) {
 		if (action.options.variables != '') {
 			var templ = build_templatedata_string(action.options);
 			if (templ) {
-				out += ' "' + templ.replace(/"/g,'\\"') + '"';
+				self.system.emit('variable_parse', templ, function (value) {
+					out += ' "' + value.replace(/"/g,'\\"') + '"';
+				})
 			}
 		}
 
@@ -920,7 +922,9 @@ instance.prototype.action = function(action) {
 		if (action.options.variables != '') {
 			var templ = build_templatedata_string(action.options);
 			if (templ) {
-				out += ' "' + templ.replace(/"/g,'\\"') + '"';
+				self.system.emit('variable_parse', templ, function (value) {
+					out += ' "' + value.replace(/"/g,'\\"') + '"';
+				})
 			}
 		}
 
