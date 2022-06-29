@@ -901,11 +901,7 @@ instance.prototype.action = function(action) {
 
 		if (action.options.variables != '') {
 			var templ = build_templatedata_string(action.options);
-			if (templ) {
-				self.system.emit('variable_parse', templ, function (value) {
-					out += ' "' + value.replace(/"/g,'\\"') + '"';
-				})
-			}
+			out += ' "' + templ.replace(/"/g,'\\"') + '"';
 		}
 
 	} else if (cmd == 'CG UPDATE') {
@@ -921,11 +917,7 @@ instance.prototype.action = function(action) {
 
 		if (action.options.variables != '') {
 			var templ = build_templatedata_string(action.options);
-			if (templ) {
-				self.system.emit('variable_parse', templ, function (value) {
-					out += ' "' + value.replace(/"/g,'\\"') + '"';
-				})
-			}
+			out += ' "' + templ.replace(/"/g,'\\"') + '"';
 		}
 
 	} else if (cmd == 'CG PLAY') {
@@ -966,7 +958,9 @@ instance.prototype.action = function(action) {
 		debug('sending tcp', out, "to", self.config.host);
 
 		if (self.socket !== undefined && self.socket.connected) {
-			self.socket.send(out + "\r\n");
+			self.system.emit('variable_parse', out, function (value) {
+				self.socket.send(value + "\r\n");
+			})
 		} else {
 			debug('Socket not connected :(');
 		}
