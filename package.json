@@ -1,34 +1,21 @@
 {
 	"name": "casparcg-server",
-	"legacy": [
-		"casparcg"
-	],
-	"version": "1.0.5",
-	"api_version": "1.0.0",
-	"keywords": [
-		"Video",
-		"Software",
-		"Graphics"
-	],
-	"manufacturer": "CasparCG",
-	"product": "Server",
-	"shortname": "caspar",
-	"homepage": "https://github.com/bitfocus/companion-module-casparcg-server#readme",
-	"description": "CasparCG module for Companion",
+	"version": "2.0.0",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "Håkon Nessjøen <haakon@bitfocus.io>",
+	"prettier": "@companion-module/tools/.prettierrc.json",
 	"license": "ISC",
 	"dependencies": {
+		"@companion-module/base": "~1.1.1",
 		"xml2js": "^0.4.19"
-	},
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-casparcg-server/issues"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-casparcg-server.git"
+	},
+	"devDependencies": {
+		"@companion-module/tools": "^1.0.0"
 	}
 }

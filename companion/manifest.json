@@ -1,0 +1,34 @@
+{
+	"id": "casparcg-server",
+	"name": "casparcg-server",
+	"shortname": "caspar",
+	"description": "CasparCG module for Companion",
+	"version": "0.0.0",
+	"license": "ISC",
+	"repository": "git+https://github.com/bitfocus/companion-module-casparcg-server.git",
+	"bugs": "https://github.com/bitfocus/companion-module-casparcg-server/issues",
+	"maintainers": [
+		{
+			"name": "Håkon Nessjøen",
+			"email": "haakon@bitfocus.io"
+		}
+	],
+	"legacyIds": [
+		"casparcg"
+	],
+	"runtime": {
+		"type": "node18",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../index.js"
+	},
+	"manufacturer": "CasparCG",
+	"products": [
+		"Server"
+	],
+	"keywords": [
+		"Video",
+		"Software",
+		"Graphics"
+	]
+}
