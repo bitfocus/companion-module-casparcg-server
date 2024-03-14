@@ -293,12 +293,13 @@ class instance extends InstanceBase {
 			return
 		}
 
-		parseString(data, (err, result) => {
+		parseString(data, async (err, result) => {
 			if (err) {
 				this.log('debug', 'Error in INFO response: ' + err)
 			} else {
 				try {
-					var offset = parseInt(options.offset)
+					const offsetString = await this.parseVariablesInString(options.offset)
+					var offset = parseInt(offsetString)
 
 					var framerate = 0
 					var seek = 0

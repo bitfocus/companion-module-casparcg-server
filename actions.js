@@ -133,12 +133,13 @@ module.exports = function compileActionDefinitions(self) {
 		},
 	]
 
-	const sendCommand = (cmd) => {
+	const sendCommand = async (cmd) => {
 		if (cmd) {
 			self.log('debug', 'sending tcp ' + cmd + ' to ' + self.config.host)
 
 			if (self.socket && self.socket.isConnected) {
-				self.socket.send(cmd + '\r\n')
+				const value = await self.parseVariablesInString(cmd)
+				self.socket.send(value + '\r\n')
 			} else {
 				self.log('debug', 'Socket not connected :(')
 			}
@@ -413,10 +414,7 @@ module.exports = function compileActionDefinitions(self) {
 
 				if (action.options.variables != '') {
 					const templ = build_templatedata_string(action.options)
-					if (templ) {
-						const value = await self.parseVariablesInString(templ)
-						cmd += ' "' + value.replace(/"/g, '\\"') + '"'
-					}
+					cmd += ' "' + templ.replace(/"/g, '\\"') + '"'
 				}
 
 				sendCommand(cmd)
@@ -474,10 +472,7 @@ module.exports = function compileActionDefinitions(self) {
 
 				if (action.options.variables != '') {
 					var templ = build_templatedata_string(action.options)
-					if (templ) {
-						const value = await self.parseVariablesInString(templ)
-						cmd += ' "' + value.replace(/"/g, '\\"') + '"'
-					}
+					cmd += ' "' + templ.replace(/"/g, '\\"') + '"'
 				}
 
 				sendCommand(cmd)
@@ -569,6 +564,7 @@ module.exports = function compileActionDefinitions(self) {
 					label: 'Command',
 					id: 'cmd',
 					default: 'CLEAR 1',
+					useVariables: true,
 				},
 			],
 			callback: (action) => {
@@ -597,7 +593,7 @@ module.exports = function compileActionDefinitions(self) {
 					label: 'Seconds (from end: prefix "-")',
 					id: 'offset',
 					default: '',
-					regex: '/^[+-]?\\d+$/',
+					useVariables: true,
 				},
 			],
 			callback: (action) => {
