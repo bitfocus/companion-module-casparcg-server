@@ -214,7 +214,7 @@ module.exports = function compileActionDefinitions(self) {
 			},
 		},
 		RESUME: {
-			label: 'RESUME',
+			name: 'RESUME',
 			options: PAUSERESUMESTOPCLEARPARAMS,
 			callback: (action) => {
 				sendPauseResumeStopClear('RESUME', action)
