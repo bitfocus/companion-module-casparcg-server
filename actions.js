@@ -26,7 +26,6 @@ function build_templatedata_string(options) {
 }
 
 function AMCP_PARAMETER(data) {
-	data = data.replace(/\//g, '\\\\')
 	data = data.replace(/"/g, '\\"')
 
 	if (data.match(/\s/)) {
