@@ -4,7 +4,7 @@
 	"shortname": "caspar",
 	"description": "CasparCG module for Companion",
 	"version": "0.0.0",
-	"license": "ISC",
+	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-casparcg-server.git",
 	"bugs": "https://github.com/bitfocus/companion-module-casparcg-server/issues",
 	"maintainers": [
